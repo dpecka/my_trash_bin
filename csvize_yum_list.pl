@@ -2,6 +2,8 @@
 #
 # usage: yum -q list --showduplicates | /path/to/this/script
 #
+# tested on el6 (centos/rhel)
+#
 
 use strict;
 use warnings;
