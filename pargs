@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $_pid = shift;
+
+
+die "bad parameters, pid no. is expected\n" if ! $_pid;
+die "no such a process: $_pid\n" if ! -d "/proc/$_pid";
+
+open(my $fh, "<", "/proc/$_pid/cmdline") || die "cannot open /proc/$_pid/cmdline\n";
+chomp(my @cmdline = <$fh>);
+close $fh;
+
+my @pargs = split("\0", shift @cmdline);
+my $counter = 0;
+
+foreach(@pargs) {
+        print "argv[$counter] $_\n";
+        $counter++;
+};
+
+exit 0;
+
