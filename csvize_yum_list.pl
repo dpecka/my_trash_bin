@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 #
-# usage: yum -q list --showduplicates | /path/to/this/script
+# script for converting yum list format to CSV
+# tested on el6 and el7 (centos/rhel)
 #
-# tested on el6 (centos/rhel)
+# usage: yum -q list --showduplicates | /path/to/this/script
 #
 
 use strict;
