@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# generates a random mac address
+#
 
 use strict;
 use warnings;
