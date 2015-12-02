@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# script emulating pargs command on SunOS
+#
 
 use strict;
 use warnings;
