@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+### BEGIN INIT INFO
+# Provides:       microfw
+# Required-Start: $remote_fs $network
+# Required-Stop:  $remote_fs $network
+# Default-Start:  3 5
+# Default-Stop:   0 6
+# Short-Description: microfw
+# Description:    microfw tiny firewall
+### END INIT INFO
+
+MICROFW="/usr/sbin/microfw"
+
+test -x $MICROFW || exit 5
+
+source /etc/rc.status
+
+rc_reset
+
+case "$1" in
+	start)
+	echo -n "Starting microfw firewall"
+	$MICROFW start
+	rc_status -v
+	;;
+	stop)
+	echo -n "Shutting down microfw firewall"
+	$MICROFW stop
+	rc_status -v
+	;;
+	*)
+	echo "Usage: $0 {start|stop}"
+	exit 1
+	;;
+esac
+
+rc_exit

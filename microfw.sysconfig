@@ -1,0 +1,84 @@
+## Names:       LOAD_METHOD, LOAD6_METHOD
+## Type:        string
+## Default:     "load_iptables", "load_ip6tables"
+## Example:     "iptables-restore < /dev/null"
+## Description:
+#
+# The method that restores iptables, predefined load_iptables() and
+# load_ip6tables() represent for ipv4 and ipv6:
+#
+# `iptables-restore < /etc/sysconfig/network/iptables'
+# `ip6tables-restore < /etc/sysconfig/network/ip6tables'
+#
+# Full command or function along with its declaration could be used here.
+#
+#LOAD_METHOD="load_iptables"
+#LOAD6_METHOD="load_ip6tables"
+
+
+## Names:       FLUSH_METHOD, FLUSH6_METHOD
+## Type:        string
+## Default:     "flush_iptables filter nat", "flush_ip6tables filter nat"
+## Example:     "/path/to/alternative/script"
+## Description:
+#
+# Method, that flushes the iptables and restores the default rules. Predefined
+# functions flush_{iptables,ip6tables} accept as arguments the names of the
+# tables to flush and restore. Tables, that are not specified here but
+# populated from LOAD_METHODs will NOT be flushed on stop() method.
+# Functions flush_iptables() and flush_ip6tables() set in specified tables all
+# chains to the default policy ACCEPT.
+#
+# Full command or function along with its declaration could be used here.
+#
+#FLUSH_METHOD="flush_iptables filter nat"
+FLUSH6_METHOD="flush_ip6tables filter nat raw"
+
+
+## Names:       LOAD_PRE, LOAD_POST
+## Type:        string
+## Default:     ""
+## Example:     "/path/to/alternative/script"
+## Description:
+#
+# Commands or scripts to be executed before and after the LOAD* methods.
+#
+#LOAD_PRE=""
+#LOAD_POST=""
+
+
+## Names:       FLUSH_PRE, FLUSH_POST
+## Type:        string
+## Default:     ""
+## Example:     "/path/to/alternative/script"
+## Description:
+#
+# Commands or scripts to be executed before and after the FLUSH* methods.
+#
+#FLUSH_PRE=""
+#FLUSH_POST=""
+
+
+## Names:	MODLOAD
+## Type:	string
+## Default:	""
+## Example:	"mod1 mod2 mod3"
+## Description:
+#
+# List of kernel modules loaded one-by-one using the modprobe command.
+# These modules are explicitely loaded before executing LOAD*_METHOD.
+#
+#MODLOAD=""
+
+
+## Names:	MODUNLOAD
+## Type:        string
+## Default:     "$MODLOAD"
+## Example:     "mod1 mod2 mod3"
+## Description:
+#
+# List of kernel modules unloaded one-by-one (and in listed order) using
+# the `modprobe -r modname' command. So order probably matters.
+# These modules are explicitely unloaded after executing FLUSH*_METHOD.
+#
+#MODUNLOAD="$MODLOAD"

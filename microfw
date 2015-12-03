@@ -1,0 +1,119 @@
+#!/bin/bash
+# microfw tiny firewall
+# v2.0 - 2015-10-29
+# License: GPL-2.0+
+
+## Set variables from here
+
+MODLOAD="";
+MODUNLOAD="$MODLOAD";
+
+LOAD_PRE="";
+LOAD_POST="";
+
+LOAD_METHOD="load_iptables";
+LOAD6_METHOD="load_ip6tables";
+
+FLUSH_PRE="";
+FLUSH_POST="";
+
+FLUSH_METHOD="flush_iptables filter nat";
+FLUSH6_METHOD="flush_ip6tables filter nat";
+
+[ -r "/etc/sysconfig/microfw" ] && . /etc/sysconfig/microfw;
+
+IPTABLES=$(which iptables);
+IP6TABLES=$(which ip6tables);
+
+## Predefined functions from here
+
+load_iptables() {
+	iptables-restore < /etc/sysconfig/network/iptables;
+	return $?;
+};
+
+load_ip6tables() {
+	ip6tables-restore < /etc/sysconfig/network/ip6tables;
+	return $?;
+};
+
+flush_iptables() {
+	local _exit=0;
+	for _table in $@; do
+		$IPTABLES -t $_table -X; _exit=$((_exit+$?));
+		$IPTABLES -t $_table -F; _exit=$((_exit+$?));
+		_set_default_policies $IPTABLES $_table; _exit=$((_exit+$?));
+	done
+	return $_exit;
+};
+
+flush_ip6tables() {
+	local _exit=0;
+	for _table in $@; do
+		$IP6TABLES -t $_table -X; _exit=$((_exit+$?));
+		$IP6TABLES -t $_table -F; _exit=$((_exit+$?));
+		_set_default_policies $IP6TABLES $_table; _exit=$((_exit+$?));
+	done
+	return $_exit;
+};
+
+_set_default_policies() {
+	local _exit=0;
+	filter="INPUT FORWARD OUTPUT";
+	nat="PREROUTING POSTROUTING INPUT OUTPUT";
+	mangle="PREROUTING POSTROUTING INPUT OUTPUT FORWARD";
+	raw="PREROUTING OUTPUT";
+	security="INPUT FORWARD OUTPUT";
+	for _chain in ${!2}; do
+		$1 -t $2 -P $_chain ACCEPT; _exit=$((_exit+$?));
+	done
+	return $_exit;
+};
+
+_modload() {
+	local _exit=0;
+	for _mod in $@; do
+		modprobe $_mod; _exit=$((_exit+$?));
+	done
+	return $_exit;
+
+};
+
+_modunload() {
+	local _exit=0;
+	for _mod in $@; do
+		modprobe -r $_mod; _exit=$((_exit+$?));
+	done
+	return $_exit;
+};
+
+## main() from here
+
+start_method() {
+	local _exit=0;
+	$LOAD_PRE; _exit=$((_exit+$?));
+	_modload $MODLOAD; _exit=$((_exit+$?));
+	$LOAD_METHOD; _exit=$((_exit+$?));
+	$LOAD6_METHOD; _exit=$((_exit+$?));
+	$LOAD_POST; _exit=$((_exit+$?));
+	[ "$_exit" -gt 0 ] && return 2;
+	return 0;
+};
+
+stop_method() {
+	local _exit=0;
+	$FLUSH_PRE; _exit=$((_exit+$?));
+	$FLUSH_METHOD; _exit=$((_exit+$?));
+	$FLUSH6_METHOD; _exit=$((_exit+$?));
+	_modunload $MODLOAD; _exit=$((_exit+$?));
+	$FLUSH_POST; _exit=$((_exit+$?));
+	[ "$_exit" -gt 0 ] && return 2;
+	return 0;
+};
+
+case $1 in
+	start) start_method; exit $?;;
+	stop) stop_method; exit $?;;
+	*) exit 1;;
+esac
+
