@@ -34,12 +34,11 @@ while(@ARGV) {
 # usage: printf_in_format $format
 #
 sub printf_in_format {
-  ### HERE IS YOUR FUCKING FISH
-  my ($str) = shift;
-  my @params;
-  $str =~ s/(%[^{]*) \{ ([^{]+) \}/push @params, $pool{$2}; $1 . 's'/gex;
-#  print "## debug: $str\n";
-  printf("$str", @params);
+	my ($str) = shift;
+	my @params;
+	$str =~ s/(%[^{]*) \{ ([^{]+) \}/push @params, $pool{$2}; $1 . 's'/gex;
+	#  print "## debug: $str\n";
+	printf("$str", @params);
 };
 
 
