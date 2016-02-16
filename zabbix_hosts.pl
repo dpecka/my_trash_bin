@@ -31,6 +31,9 @@ my $_action_done;
 get_hosts(@ARGV) if($action eq "get_hosts");
 delete_hosts(@ARGV) if($action eq "delete_hosts");
 import_hosts(@ARGV) if($action eq "import_hosts");
+unmonitor_host(@ARGV) if($action eq "unmonitor_host");
+monitor_host(@ARGV) if($action eq "monitor_host");
+
 
 
 ## logout and/or help if bad params
@@ -47,7 +50,7 @@ sub help {
 
 usage:		./this_script <action> username pwd json_uri @action_params
 
-actions:	get_hosts, delete_hosts, import_hosts
+actions:	get_hosts, delete_hosts, import_hosts, monitor_host, unmonitor_host
 
 rationale:	all params are positional and at least an "action", "username", "pwd"
 		and "json_uri" are always required. Actions expect following additional
@@ -56,6 +59,8 @@ rationale:	all params are positional and at least an "action", "username", "pwd"
 		get_hosts:	no additional params
 		delete_hosts:	list of hosts IDs to remove - can be get using get_hosts()
 		import_hosts:	path to valid xml file to import into a zabbix
+		unmonitor_host:	host ID (no multiple hosts at once)
+		monitor_host:	host ID (no multiple hosts at once)
 
 example:	./this_script import_hosts \
 			admin zabbix \
@@ -117,7 +122,7 @@ sub get_hosts {
 	my $response = $client->call($uri, $json_obj);
 	die "host.get failed\n" unless $response->content->{"result"};
 	$_action_done = "yes";
-	printf("%-24s\t%s\n", $_->{"hostid"}, $_->{"name"}) foreach( @{ $response->content->{"result"} } );
+	printf("%-16s%s\n", $_->{"hostid"}, $_->{"name"}) foreach( @{ $response->content->{"result"} } );
 
 };
 
@@ -197,5 +202,39 @@ sub import_hosts {
 	my $response = $client->call($uri, $json_obj);
 	die "configuration.import failed\n" unless $response->content->{"result"};
 	$_action_done = "yes";
+};
+
+sub unmonitor_host {
+	my $json_obj = {
+		jsonrpc => "2.0",
+		method => "host.update",
+		params => {
+			hostid => shift,
+			status => "1",
+		},
+		auth => "$auth_hash",
+		id => "1",
+
+        };
+        my $response = $client->call($uri, $json_obj);
+        die "host.update failed\n" unless $response->content->{"result"};
+        $_action_done = "yes";
+};
+
+sub monitor_host {
+        my $json_obj = {
+                jsonrpc => "2.0",
+                method => "host.update",
+                params => {
+                        hostid => shift,
+                        status => "0",
+                },
+                auth => "$auth_hash",
+                id => "0",
+
+        };
+        my $response = $client->call($uri, $json_obj);
+        die "host.update failed\n" unless $response->content->{"result"};
+        $_action_done = "yes";
 };
 
