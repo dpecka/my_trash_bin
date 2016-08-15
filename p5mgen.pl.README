@@ -4,7 +4,7 @@ Usage:
 
 -----------------
 
-Sample configuration file for package msma/rundeck-25 looks as follows:
+Sample configuration file for package extra/rundeck-25 looks as follows:
 
 -----------------
 @main
@@ -29,7 +29,7 @@ classification  EXTRA
 @raw
 depend fmri=pkg:/developer/java/jdk type=require
 group groupname=rundeck
-user group=rundeck username=rundeck login-shell=/usr/bin/sh home-dir=/opt/msma/rundeck-current
+user group=rundeck username=rundeck login-shell=/usr/bin/sh home-dir=/opt/extra/rundeck-current
 --------------------
 
 Configuration file has 3 main sections, each specified in the file by `@section-name'. Actually the `main', `files' and `raw' sections are implemented. Blank lines and the lines commented out by `#' character will be silently skipped in all sections.
@@ -38,7 +38,7 @@ a) @main - sets main parameters for package like version, description, release, 
 
 builddir:	source directory from where we pack the actual package, this is usually chroot directory after installing software using DESTDIR=/path parameter for make or generally, any directory where are placed files for to be packed
 
-targetdir:	is the target directory for installed packages from IPS. So for example, if software is built with prefix /opt/msma/sw but installed to /builddir/build-1 (using make DESTDIR=/builddir/build-1 install), builddir will be /builddir/build-1 and targetdir will be /opt/msma/sw
+targetdir:	is the target directory for installed packages from IPS. So for example, if software is built with prefix /opt/extra/sw but installed to /builddir/build-1 (using make DESTDIR=/builddir/build-1 install), builddir will be /builddir/build-1 and targetdir will be /opt/extra/sw
 
 name:	is package name without the version string
 
@@ -61,7 +61,7 @@ b) @files - this section allows packager to postprocess or to modify a file list
 To specify file, the full mask matching the file is required, so for example:
 `+/bin' will match only to a single /bin directory or file whilst `+/bin.*' will match to all files in /bin. Regular expressions are allowed, so for instance +/bin/(foo|bar) will select files /bin/foo and /bin/bar
 
-Rewrite rules are used to change the attributes of the file that are normally derived from the filesystem as they are stored in the builddir. Actually implemented attributes are owner=, mode=, group= and path=. If the files are stored in the builddir under the local build account, to specify theirs ownership for a root could be done using this (assuming, that our whole software is prefixed to /opt/msma/sw): `+/opt/msma/sw.*,owner=root,group=root'. It is possible to have more rules matching the same file. They will be applied in the order in what they are specified in the config file. All additional attributes that are specified in the coma separated list will be appended to attributes per-file as they are. See please official documentation on which attributes IPS supports.
+Rewrite rules are used to change the attributes of the file that are normally derived from the filesystem as they are stored in the builddir. Actually implemented attributes are owner=, mode=, group= and path=. If the files are stored in the builddir under the local build account, to specify theirs ownership for a root could be done using this (assuming, that our whole software is prefixed to /opt/extra/sw): `+/opt/extra/sw.*,owner=root,group=root'. It is possible to have more rules matching the same file. They will be applied in the order in what they are specified in the config file. All additional attributes that are specified in the coma separated list will be appended to attributes per-file as they are. See please official documentation on which attributes IPS supports.
 
 c) @raw - this section contains list of additional IPS rules that are added to the p5m manifest as they are, so for instance dependencies and creating users shall be specified in this section (see example above) as well as other exotic rules that are rarely used.
 
