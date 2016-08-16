@@ -124,6 +124,8 @@ depend fmri=pkg:/developer/java/jdk type=require
 
 EOF
 
-$ pkgsend publish -s /repos/sample -d /home/build/build0/opt/sample sample-p5m.cfg
+$ ./p5mgen.pl sample-p5m.cfg > sample.p5m
+
+$ pkgsend publish -s /repos/sample -d /home/build/build0/opt/sample sample.p5m
 
 In the last command we assume, that /repos/sample contains valid repository for solaris.
