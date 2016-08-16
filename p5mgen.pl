@@ -9,6 +9,8 @@
 use strict;
 use warnings;
 use File::Find;
+use File::Spec;
+use File::Basename qw(dirname);
 
 my $cfg_file = shift;
 my @cmd_args = @ARGV;
@@ -84,10 +86,10 @@ sub build_filelist() {
 	sub wanted() {
 		push(@{ $file_hash{'filelist'} }, $File::Find::name);
 		@{ $file_hash{"$File::Find::name"} } = stat($File::Find::name);
+		
 };
 	
 	find(\&wanted, $cfg_hash{'builddir'});
-	return 0;
 };
 
 sub mogrify_filelist() {
@@ -100,6 +102,7 @@ sub mogrify_filelist() {
 		my $_mode = sprintf("%04o", $file_hash{$_}[2] & 07777);
 		my $_owner = getpwuid($file_hash{$_}[4]);
 		my $_path = "$cfg_hash{'targetdir'}/$_rpath";
+		my $_inum = $file_hash{$_}[1];
 		$_path =~ s@^/@@;
 		my $_extra = "";
 
@@ -148,8 +151,17 @@ sub mogrify_filelist() {
 		
 
 		printf("dir group=%s mode=%s owner=%s path=%s%s\n", $_group, $_mode, $_owner, $_path, $_extra) if -d;
-		printf("file %s group=%s mode=%s owner=%s path=%s%s\n", $_rpath, $_group, $_mode, $_owner, $_path, $_extra) if -f;
 		printf("link path=%s target=%s\n", $_path, readlink($_)) if -l;
+
+		if(-f "$_" && ! -l "$_") {
+			if(exists($file_hash{'inums'}{$_inum})) {
+#				printf("hardlink path=%s target=%s\n", $_path, $file_hash{'inums'}{$_inum});
+				printf("hardlink path=%s target=%s\n", $_path, File::Spec->abs2rel($file_hash{'inums'}{$_inum}, dirname($_)));
+			} else {
+				$file_hash{'inums'}{$_inum} = $_;
+                                printf("file %s group=%s mode=%s owner=%s path=%s%s\n", $_rpath, $_group, $_mode, $_owner, $_path, $_extra);
+			};
+		};
 	};
 	
 };
@@ -182,11 +194,8 @@ mogrify_filelist();
 append_mandatory();
 append_raw();
 
-
-
-exit 0;
-
 ### debug
+#printf(STDERR "%s\n", $_) foreach(keys(%file_hash));
 #print "cfg vars:\n";
 #print "\t$_ == $cfg_hash{$_}\n" foreach(grep(!/^in$/, keys(%cfg_hash)));
 #print "\n";
@@ -195,4 +204,4 @@ exit 0;
 #print "\t$_\n" foreach(@{ $file_hash{'filelist'} });
 #print "\n";
 
-#exit(0);
+exit(0);
