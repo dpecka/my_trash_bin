@@ -1,36 +1,45 @@
+Read please offical docu for packaging software with IPS:
+
+http://docs.oracle.com/cd/E26502_01/html/E21383/toc.html
+---------------------------------------------------------
+
 Usage:
 
 ./p5gen.pl /path/to/pkg.config -param1=value -paramN=value
 
------------------
-
 Sample configuration file for package extra/rundeck-25 looks as follows:
 
------------------
+------------------------------------------------------------------------
 @main
 
-builddir        /export/home/dpecka/src/_build/rundeck-25
-targetdir       /opt/extra/rundeck-25
-name            extra/rundeck-25
-version         2.5.1
-release         1.3.0
-description     Our extra sofware
-summary         Rundeck is workflow automation tool
+builddir        /opt/extrasw/hylafax
+targetdir       /opt/extrasw/hylafax
+name            extrasw/hylafax
+version         5.5.8
+release         1.0.0
+description     Copyright (C) 2015 Company name removed from here
+summary         hylafax from extrasw
 arch            sparc
 classification  EXTRA
 
+## this is comment, uaaa
 
 @files
-+opt/extra/rundeck-25/src.*,owner=root
--opt/extra/rundeck-25/var.*
-+opt/extra/rundeck-25/share/svc/manifest/rundeck.xml,path=var/svc/manifest/extra/rundeck.xml,restart_fmri=svc:/system/manifest-import:default
 
+#+opt/extrasw/hylafax/var/spool.*,owner=uucp,group=uucp
++opt/extrasw/hylafax/share/smf/mailfax.xml,path=var/svc/manifest/mailfax/mailfax.xml,restart_fmri=svc:/system/manifest-import:default
++opt/extrasw/hylafax/var/spool/etc/config\.ttyr(0|1),overlay=allow,preserve=true
 
 @raw
-depend fmri=pkg:/developer/java/jdk type=require
-group groupname=rundeck
-user group=rundeck username=rundeck login-shell=/usr/bin/sh home-dir=/opt/extra/rundeck-current
---------------------
+
+depend fmri=pkg:/file/gnu-coreutils type=require
+depend fmri=pkg:/text/gnu-grep type=require
+depend fmri=pkg:/text/gnu-sed type=require
+depend fmri=pkg:/extrasw/t38modem type=require
+depend fmri=pkg:/print/filter/ghostscript type=require
+depend fmri=pkg:/print/filter/ghostscript/fonts/gnu-gs-fonts-other type=require
+depend fmri=pkg:/print/filter/ghostscript/fonts/gnu-gs-fonts-std type=require
+------------------------------------------------------------------------
 
 Configuration file has 3 main sections, each specified in the file by `@section-name'. Actually the `main', `files' and `raw' sections are implemented. Blank lines and the lines commented out by `#' character will be silently skipped in all sections.
 
@@ -40,7 +49,7 @@ builddir:	source directory from where we pack the actual package, this is usuall
 
 targetdir:	is the target directory for installed packages from IPS. So for example, if software is built with prefix /opt/extra/sw but installed to /builddir/build-1 (using make DESTDIR=/builddir/build-1 install), builddir will be /builddir/build-1 and targetdir will be /opt/extra/sw
 
-name:	is package name without the version string
+name:		is package name without the version string
 
 version:	is software version string, usually in form x.y.z
 
@@ -54,7 +63,7 @@ arch:		is the IPS architecture field
 
 classification:	is the IPS classification group field
 
-All other fields and attributes that are directly not supported by this script could be passed within the @raw (see below) section. Read please official documentation regarding the supported fields (link above in the beginning of this article)
+All other directives that are directly not supported by this script could be passed within the @raw (see below) section. Read please official documentation regarding the supported fields (link above in the beginning of this article)
 
 b) @files - this section allows packager to postprocess or to modify a file list and its attributes. Syntax is, that valid line begins either with minus "-" sign or plus "+" sign. Minus sign specifies, that file(s) will be ommited in the final package, plus sign indicates, that rewrite rules (see below) will be applied on files matching the mask. If there is not specified +/- at the beginning of the line, the line will be silently ignored same as if it is commneted out.
 
@@ -63,13 +72,23 @@ To specify file, the full mask matching the file is required, so for example:
 
 Rewrite rules are used to change the attributes of the file that are normally derived from the filesystem as they are stored in the builddir. Actually implemented attributes are owner=, mode=, group= and path=. If the files are stored in the builddir under the local build account, to specify theirs ownership for a root could be done using this (assuming, that our whole software is prefixed to /opt/extra/sw): `+/opt/extra/sw.*,owner=root,group=root'. It is possible to have more rules matching the same file. They will be applied in the order in what they are specified in the config file. All additional attributes that are specified in the coma separated list will be appended to attributes per-file as they are. See please official documentation on which attributes IPS supports.
 
+example:
++opt/extrasw/hylafax/var/spool.*,owner=uucp,group=uucp
+-opt/extrasw/hylafax/var/spool/etc/config\.ttyr1
++opt/extrasw/hylafax/var/spool/etc/config\.ttyr\d,overlay=allow,preserve=true
+
+- In example above we set a global recursive ownersip to uucp:uucp over all items in opt/extrasw/hylafax/var/spool
+- we exclude from final p5m specific file opt/extrasw/hylafax/var/spool/etc/config\.ttyr1
+- we additionally set extra IPS parameters overlay= and preserve= for all files matching to ``opt/extrasw/hylafax/var/spool/etc/config\.ttyr\d''
+
+
 c) @raw - this section contains list of additional IPS rules that are added to the p5m manifest as they are, so for instance dependencies and creating users shall be specified in this section (see example above) as well as other exotic rules that are rarely used.
 
----------------------
+------------------------------------------------------------------------------------------------------
 
 Example workflow of creating IPS package of sample software (assuming we have sample.tgz with sources):
 
----------------------
+------------------------------------------------------------------------------------------------------
 
 $ gtar xzvf sample.tgz
 $ cd sample
