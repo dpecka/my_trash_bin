@@ -7,7 +7,7 @@ Usage:
 
 ./p5gen.pl /path/to/pkg.config -param1=value -paramN=value
 
-Sample configuration file for package extra/rundeck-25 looks as follows:
+Sample configuration file for package extrasw/hylafax looks as follows:
 
 ------------------------------------------------------------------------
 @main
